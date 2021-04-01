@@ -101,8 +101,8 @@ var play = function () {
 	stream.on('info', async function (info) {
 		curSong.name = info.videoDetails.title;
                 curSong.id = info.videoDetails.id;
-		nextSong.id = info.related_videos[Math.floor(Math.random() * info.related_videos.length)].id;
-		nextSong.name = info.related_videos[Math.floor(Math.random() * info.related_videos.length)].title;
+		nextSong.id = info.related_videos[0].id;
+		nextSong.name = info.related_videos[0].title;
 		// Convert into mp3
 		audio = stream.pipe(convert());
 		// Then broadcast it
