@@ -99,7 +99,7 @@ var play = function () {
 	}
 	var stream = ytdl(url, { filter: 'audioonly', quality: 'highestaudio'});
 	stream.on('info', async function (info) {
-		title = info.videoDetails.title;
+		curSong.title = info.videoDetails.title;
 		nextSong.id = info.related_videos[Math.floor(Math.random() * info.related_videos.length)].id;
 		nextSong.name = info.related_videos[Math.floor(Math.random() * info.related_videos.length)].title;
 		// Convert into mp3
