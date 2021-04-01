@@ -105,7 +105,7 @@ var play = function () {
 		// Convert into mp3
 		audio = stream.pipe(convert());
 		// Then broadcast it
-		broadcast(audio, title);
+		broadcast(audio, curSong.title);
 	});
 };
 
