@@ -14,7 +14,7 @@ npm install
 ```
 
 ## Configuring
-Put your Song URL at `yturl.txt` (ONLY 1 URL, DO NOT PUT ALOT ON IT), then do `npm start` then go to http://0.0 0.0:8080
+Put your Song URL at `yturl.txt` (ONLY 1 URL, DO NOT PUT ALOT ON IT), then do `node .`, After that, go to http://0.0.0.0:8080
 
 # Community
 - [Discord](https://quickstream.yonle.repl.co/discord)
