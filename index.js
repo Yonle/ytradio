@@ -108,6 +108,7 @@ var play = function () {
 		// Then broadcast it
 		broadcast(audio, curSong.name);
 	});
+        stream.on('error', console.error);
 };
 
 var broadcast = function (ReadStream, title) {
