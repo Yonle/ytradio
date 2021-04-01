@@ -4,15 +4,16 @@
   "description": "A simple http radio stadion with ytdl-core.",
   "main": "index.js",
   "scripts": {
+    "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Yonle",
   "license": "ISC",
   "dependencies": {
-    "prism-media": "^1.2.9",
-    "throttle": "^1.0.3",
-    "ytdl-core": "^4.5.0"
+    "prism-media": "latest",
+    "throttle": "latest",
+    "ytdl-core": "latest"
   },
   "devDependencies": {},
   "repository": {
