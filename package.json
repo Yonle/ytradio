@@ -13,7 +13,8 @@
   "dependencies": {
     "prism-media": "latest",
     "throttle": "latest",
-    "ytdl-core": "latest"
+    "ytdl-core": "latest",
+    "ws": "latest"
   },
   "devDependencies": {},
   "repository": {
