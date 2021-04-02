@@ -85,7 +85,7 @@ wss.broadcast = (function (data) {
 var launch = function () {
 	if (!url || url.length < 1) {
 		console.error("No youtube URL provided. Aborting....")
-		return prorcess.exit(1);
+		return process.exit(1);
 	} else { 
 		console.log('Radio is now listening on port', 8080);
 		return play();
