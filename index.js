@@ -7,13 +7,7 @@ const ytdl = require("ytdl-core");
 
 function convert() {
         return new ffmpeg({
-                args: [
-                '-analyzeduration', '0',
-                '-loglevel', '0',
-                '-f', 'mp3',
-                '-ar', '48000',
-                '-ac', '2'
-                ]
+                args: args: ["-analyzeduration", "0", "-loglevel", "0", "-f", "mp3", "-ar", "48000", "-ac", "2", "-ab", "192", "-map", "0:a", "-map_metadata", "-1"]
         });
 };
 
@@ -112,7 +106,7 @@ var play = function () {
 };
 
 var broadcast = function (ReadStream, title) {
-	stream = new throttle(128000 / 8);
+	stream = new throttle(24000);
 	ReadStream.pipe(stream);
 	wss.broadcast(title);
 	console.log('-> Now Playing:', title);
