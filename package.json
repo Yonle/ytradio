@@ -11,12 +11,10 @@
   "author": "Yonle",
   "license": "ISC",
   "dependencies": {
-    "prism-media": "latest",
-    "throttle": "latest",
-    "ytdl-core": "latest",
-    "ws": "latest"
+    "openradio": "latest",
+    "ws": "7.x",
+    "ytdl-core": "4.x"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Yonle/ytradio.git"

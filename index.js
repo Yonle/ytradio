@@ -1,8 +1,8 @@
 const http = require("http");
 const fs = require('fs');
 const WebSocket = require("ws").Server;
-const throttle = require("throttle");
-const ffmpeg = require("prism-media").FFmpeg;
+const openradio = require("openradio");
+const radio = openradio();
 const ytdl = require("ytdl-core");
 
 // null = Random
@@ -10,13 +10,7 @@ const ytdl = require("ytdl-core");
 // Default: null / 3 is recommended
 var random_query_length = null;
 
-function convert() {
-  return new ffmpeg({
-    args: ["-analyzeduration", "0", "-loglevel", "0", "-f", "mp3", "-ar", "48000", "-ac", "2", "-ab", "192", "-map", "0:a", "-map_metadata", "-1"]
-  });
-};
-
-var url = fs.readFileSync("yturl.txt", 'utf8');
+var url = process.argv.slice(2)[0] || fs.readFileSync("yturl.txt", 'utf8');
 
 // Query
 var curSong = {
@@ -29,7 +23,6 @@ var nextSong = {
   id: null
 }
 // Sink management
-var sink = new Map();
 var wsClient = new Map();
 
 // Server
@@ -38,25 +31,11 @@ var server = http.createServer(function(req, res) {
   var id = Math.random().toString(36).slice(2);
   res.setHeader("content-type", "audio/mpeg");
   res.setHeader("title", curSong.title || "No songs....");
-  sink.set(id, res);
-
-  req.on('close', function() {
-    sink.delete(id);
-  });
+  radio.pipe(res);
 });
 
 server.listen(8080, () => launch());
 server.on('error', console.error);
-
-server.broadcast = (function(data) {
-  sink.forEach(function(res, id) {
-    res.write(data, error => {
-      if (error) {
-        sink.delete(id);
-      }
-    });
-  });
-});
 
 // Websocket, for Song name information
 var wss = new WebSocket({ server });
@@ -103,20 +82,26 @@ var play = function() {
     curSong.id = info.videoDetails.id;
     nextSong.id = info.related_videos[randomQuery].id;
     nextSong.name = info.related_videos[randomQuery].title;
-    // Convert into mp3
-    audio = stream.pipe(convert());
     // Then broadcast it
-    broadcast(audio, curSong.name);
+    radio.play(stream);
+    wss.broadcast(curSong.name);
+    console.log('-> Now Playing:', curSong.name);
   });
-  stream.on('error', console.error);
+
+  stream.on('error', (e) => {
+  	console.error(e);
+  	play();
+  });
 };
 
-// Broadcast Engine
-var broadcast = function(ReadStream, title) {
-  stream = new throttle(24000);
-  ReadStream.pipe(stream);
-  wss.broadcast(title);
-  console.log('-> Now Playing:', title);
-  stream.on('data', server.broadcast);
-  stream.on('end', play);
-};
+radio.on('end', play);
+radio.on('error', (e) => {
+	console.error(e);
+	play();
+});
+
+process.stdin.on('data', () => {
+	if (!radio.stream) return;
+	radio.stream.destroy();
+	radio.emit('end');
+});
