@@ -30,7 +30,7 @@ var wsClient = new Map();
 var server = http.createServer(function(req, res) {
   var id = Math.random().toString(36).slice(2);
   res.setHeader("content-type", "audio/mpeg");
-  res.setHeader("title", curSong.title || "No songs....");
+  if (req.method === "HEAD") return res.end();
   radio.pipe(res);
 });
 
