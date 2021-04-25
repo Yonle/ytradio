@@ -4,7 +4,7 @@ const WebSocket = require("ws").Server;
 const openradio = require("openradio");
 const radio = openradio();
 const ytdl = require("ytdl-core");
-
+var playing = false;
 // null = Random
 // Max: 18
 // Default: null / 3 is recommended
@@ -71,6 +71,7 @@ var launch = function() {
 };
 
 var play = function() {
+  if (playing) return false;
   if (nextSong.id) {
     url = `https://youtu.be/${nextSong.id}`;
     fs.writeFileSync('yturl.txt', url, 'utf8');
@@ -86,15 +87,20 @@ var play = function() {
     radio.play(stream);
     wss.broadcast(curSong.name);
     console.log('-> Now Playing:', curSong.name);
+    playing = true;
   });
 
   stream.on('error', (e) => {
   	console.error(e);
+  	playing = false;
   	play();
   });
 };
 
-radio.on('end', play);
+radio.on('end', () => {
+	playing = false;
+	play();
+});
 radio.on('error', (e) => {
 	console.error(e);
 	play();
@@ -102,6 +108,6 @@ radio.on('error', (e) => {
 
 process.stdin.on('data', () => {
 	if (!radio.stream) return;
-	radio.stream.destroy();
-	radio.emit('end');
+	playing = false;
+	play();
 });
