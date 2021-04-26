@@ -92,7 +92,6 @@ var play = function() {
 
   stream.on('error', (e) => {
   	console.error(e);
-  	playing = false;
   	play();
   });
 };
