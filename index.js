@@ -4,44 +4,39 @@ const WebSocket = require("ws").Server;
 const openradio = require("openradio");
 const radio = openradio();
 const ytdl = require("ytdl-core");
-var playing = false;
-// null = Random
-// Max: 18
-// Default: null / 3 is recommended
-var random_query_length = null;
-
-var url = process.argv.slice(2)[0] || fs.readFileSync("yturl.txt", 'utf8');
+let playing = false;
+let url = process.argv.slice(2)[0] || fs.readFileSync("yturl.txt", 'utf8');
 
 // Query
-var curSong = {
+let curSong = {
   name: null,
   id: null
 };
 
-var nextSong = {
+let nextSong = {
   name: null,
   id: null
 }
 // Sink management
-var wsClient = new Map();
+let wsClient = new Map();
 
 // Server
 
-var server = http.createServer(function(req, res) {
-  var id = Math.random().toString(36).slice(2);
+let repeater = openradio.repeater(radio);
+let server = http.createServer(function(req, res) {
   res.setHeader("content-type", "audio/mpeg");
   if (req.method === "HEAD") return res.end();
-  radio.pipe(res);
+  repeater(res);
 });
 
-server.listen(8080, () => launch());
+server.listen(process.env.PORT || 8080, () => launch());
 server.on('error', console.error);
 
 // Websocket, for Song name information
-var wss = new WebSocket({ server });
+let wss = new WebSocket({ server });
 
 wss.on('connection', (ws, req) => {
-  var id = Math.random().toString(36).slice(2);
+  let id = Math.random().toString(36).slice(2);
   wsClient.set(id, ws);
   if (curSong.name != null) ws.send(curSong.name);
   req.on('close', function() {
@@ -60,29 +55,28 @@ wss.broadcast = (function(data) {
 });
 
 // Player
-var launch = function() {
+let launch = function() {
   if (!url || url.length < 1) {
     console.error("No youtube URL provided. Aborting....");
     return process.exit(1);
   } else {
-    console.log('Radio is now listening on port', 8080);
+    console.log('Radio is now listening on port', process.env.PORT || 8080);
     return play();
   }
 };
 
-var play = function() {
+let play = function() {
   if (playing) return false;
   if (nextSong.id) {
     url = `https://youtu.be/${nextSong.id}`;
     fs.writeFileSync('yturl.txt', url, 'utf8');
   }
-  var stream = ytdl(url, { filter: 'audioonly', quality: 'highestaudio' });
+  let stream = ytdl(url, { filter: 'audioonly', quality: 'highestaudio' });
   stream.on('info', async function(info) {
-    var randomQuery = Math.floor(Math.random() * (random_query_length || info.related_videos.length));
     curSong.name = info.videoDetails.title;
     curSong.id = info.videoDetails.id;
-    nextSong.id = info.related_videos[randomQuery].id;
-    nextSong.name = info.related_videos[randomQuery].title;
+    nextSong.id = info.related_videos[0].id;
+    nextSong.name = info.related_videos[0].title;
     // Then broadcast it
     radio.play(stream);
     wss.broadcast(curSong.name);
@@ -96,11 +90,14 @@ var play = function() {
   });
 };
 
-radio.on('end', () => {
+radio.on('finish', () => {
 	playing = false;
+	console.log('Next:', nextSong.title);
 	play();
 });
+
 radio.on('error', (e) => {
+	playing = false;
 	console.error(e);
 	play();
 });

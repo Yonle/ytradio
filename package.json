@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "Yonle",
-  "license": "ISC",
+  "license": "BSD-3-Clause",
   "dependencies": {
     "openradio": "latest",
     "ws": "7.x",
