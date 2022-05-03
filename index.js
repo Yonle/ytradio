@@ -10,13 +10,15 @@ let url = process.argv.slice(2)[0] || fs.readFileSync("yturl.txt", 'utf8');
 // Query
 let curSong = {
   name: null,
-  id: null
+  id: null,
+  rv: null
 };
 
 let nextSong = {
   name: null,
   id: null
 }
+
 // Sink management
 let wsClient = new Map();
 
@@ -70,17 +72,21 @@ let play = function() {
   if (nextSong.id) {
     url = `https://youtu.be/${nextSong.id}`;
     fs.writeFileSync('yturl.txt', url, 'utf8');
+  } else if (!nextSong.id && curSong.id) {
+    nextSong.id = curSong.id;
   }
   let stream = ytdl(url, { filter: 'audioonly', quality: 'highestaudio' });
   stream.on('info', async function(info) {
     curSong.name = info.videoDetails.title;
     curSong.id = info.videoDetails.id;
-    nextSong.id = info.related_videos[0].id;
-    nextSong.name = info.related_videos[0].title;
+    curSong.rv = info.related_videos;
+    nextSong.id = curSong.rv.shift().id;
+    nextSong.name = curSong.rv.shift().title;
     // Then broadcast it
     radio.play(stream);
     wss.broadcast(curSong.name);
     console.log('-> Now Playing:', curSong.name);
+    console.log('   Next:', nextSong.name);
     playing = true;
   });
 
@@ -92,7 +98,6 @@ let play = function() {
 
 radio.on('finish', () => {
 	playing = false;
-	console.log('Next:', nextSong.title);
 	play();
 });
 
@@ -102,8 +107,20 @@ radio.on('error', (e) => {
 	play();
 });
 
-process.stdin.on('data', () => {
+console.log("Press enter to change Next query, Or type \"next\" to skip the current song.");
+process.stdin.on('data', (d) => {
+	d = d.toString('utf8');
 	if (!radio.stream) return;
-	playing = false;
-	play();
+	if (d.startsWith("next")) {
+		console.log("-  Skipping....");
+		playing = false
+		return play();
+	}
+
+	if (!nextSong.length)
+		return console.log("-  Out of query. Song will looped.");
+
+	nextSong.id = curSong.rv.shift().id;
+	nextSong.name = curSong.rv.shift().name;
+	console.log("-  Next:", nextSong.name);
 });
