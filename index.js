@@ -107,14 +107,20 @@ radio.on('error', (e) => {
 	play();
 });
 
-console.log("Press enter to change Next query, Or type \"next\" to skip the current song.");
+console.log("Press enter to change Next query, Or type \"next\" to skip the current song.\n");
+console.log("Available commands: next, setnext");
 process.stdin.on('data', (d) => {
 	d = d.toString('utf8');
+	let args = d.split(" ").slice(1);
 	if (!radio.stream) return;
 	if (d.startsWith("next")) {
 		console.log("-  Skipping....");
 		playing = false
 		return play();
+	} else if (d.startsWith("setnext")) {
+		if (!args.length) return console.log("-  Usage: setnext [youtube-video-url]");
+		nextSong.id = ytdl.getVideoID(args[0]);
+		return console.log("-  OK.");
 	}
 
 	if (!curSong.rv.length)
