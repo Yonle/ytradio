@@ -107,7 +107,7 @@ radio.on('error', (e) => {
 	play();
 });
 
-console.log("Press enter to change Next query, Or type \"next\" to skip the current song.\n");
+console.log("Press enter to change Next query, Or type \"next\" to skip the current song.");
 console.log("Available commands: next, setnext");
 process.stdin.on('data', (d) => {
 	d = d.toString('utf8');
