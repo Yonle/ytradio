@@ -117,7 +117,7 @@ process.stdin.on('data', (d) => {
 		return play();
 	}
 
-	if (!nextSong.length)
+	if (!curSong.rv.length)
 		return console.log("-  Out of query. Song will looped.");
 
 	nextSong.id = curSong.rv.shift().id;
