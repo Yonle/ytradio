@@ -121,6 +121,6 @@ process.stdin.on('data', (d) => {
 		return console.log("-  Out of query. Song will looped.");
 
 	nextSong.id = curSong.rv.shift().id;
-	nextSong.name = curSong.rv.shift().name;
+	nextSong.name = curSong.rv.shift().title;
 	console.log("-  Next:", nextSong.name);
 });
