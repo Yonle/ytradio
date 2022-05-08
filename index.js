@@ -80,8 +80,9 @@ let play = function() {
     curSong.name = info.videoDetails.title;
     curSong.id = info.videoDetails.id;
     curSong.rv = info.related_videos;
-    nextSong.id = curSong.rv.shift().id;
-    nextSong.name = curSong.rv.shift().title;
+    let nv = curSong.rv.shift();
+    nextSong.id = nv.id;
+    nextSong.name = nv.title;
     // Then broadcast it
     radio.play(stream);
     wss.broadcast(curSong.name);
@@ -126,7 +127,8 @@ process.stdin.on('data', (d) => {
 	if (!curSong.rv.length)
 		return console.log("-  Out of query. Song will looped.");
 
-	nextSong.id = curSong.rv.shift().id;
-	nextSong.name = curSong.rv.shift().title;
+	let nv = curSong.rv.shift();
+	nextSong.id = nv.id;
+	nextSong.name = nv.title;
 	console.log("-  Next:", nextSong.name);
 });
