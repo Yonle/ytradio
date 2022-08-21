@@ -29,6 +29,7 @@ let server = http.createServer(function(req, res) {
   res.setHeader("content-type", "audio/mpeg");
   if (req.method === "HEAD") return res.end();
   repeater(res);
+  res.on('error', console.error);
 });
 
 server.listen(process.env.PORT || 8080, () => launch());
@@ -75,7 +76,7 @@ let play = function() {
   } else if (!nextSong.id && curSong.id) {
     nextSong.id = curSong.id;
   }
-  let stream = ytdl(url, { filter: 'audioonly', quality: 'highestaudio' });
+  let stream = ytdl(url, { dlChunkSize: 0, filter: 'audioonly', quality: 'highestaudio' });
   stream.on('info', async function(info) {
     curSong.name = info.videoDetails.title;
     curSong.id = info.videoDetails.id;
