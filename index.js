@@ -49,7 +49,7 @@ wss.on('connection', (ws, req) => {
 });
 
 wss.broadcast = (function(data) {
-  console.log("Now Playing:", data);
+  console.log("-- Now Playing:", data);
   wsClient.forEach(function(ws, id) {
     ws.send(data, function(error) {
       if (error) {
@@ -86,11 +86,7 @@ let launch = function() {
 let play = async function() {
   if (!curSong && !playlist.length && url) {
     let song = await client.music.getInfo(getVideoID(url));
-    radio.play(getURL(song));
-    wss.broadcast(`${song.basic_info.author} - ${song.basic_info.title}`);
-    curSong = song;
     playlist = (await song.getUpNext()).contents;
-    return;
   }
 
   if (!playlist.length) {
@@ -100,6 +96,7 @@ let play = async function() {
   let song = await client.music.getInfo(playlist.shift().video_id);
   radio.play(getURL(song));
   wss.broadcast(`${song.basic_info.author} - ${song.basic_info.title}`);
+  console.log("   Up next:", `${playlist[0].author} - ${playlist[0].title.text}`);
   curSong = song;
 };
 
