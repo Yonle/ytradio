@@ -1,5 +1,5 @@
 # ytradio
-A simple http radio stadion with ytdl-core.
+A simple http radio stadion with youtubei.js
 
 ## Install
 ```bash
