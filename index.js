@@ -2,22 +2,20 @@ const http = require("http");
 const fs = require('fs');
 const WebSocket = require("ws").Server;
 const openradio = require("openradio");
-const radio = openradio();
-const ytdl = require("ytdl-core");
-let playing = false;
+const radio = openradio({
+  format: "mp3",
+  bitrate: 96
+});
+
+const YouTube = require("youtubei.js");
+
+let client = null;
+let curSong = null;
+
 let url = process.argv.slice(2)[0] || fs.readFileSync("yturl.txt", 'utf8');
 
 // Query
-let curSong = {
-  name: null,
-  id: null,
-  rv: null
-};
-
-let nextSong = {
-  name: null,
-  id: null
-}
+let playlist = [];
 
 // Sink management
 let wsClient = new Map();
@@ -32,8 +30,11 @@ let server = http.createServer(function(req, res) {
   res.on('error', console.error);
 });
 
-server.listen(process.env.PORT || 8080, () => launch());
-server.on('error', console.error);
+YouTube.Innertube.create().then(a => {
+  client = a;
+  server.listen(process.env.PORT || 8080, () => launch());
+  server.on('error', console.error);
+});
 
 // Websocket, for Song name information
 let wss = new WebSocket({ server });
@@ -41,13 +42,14 @@ let wss = new WebSocket({ server });
 wss.on('connection', (ws, req) => {
   let id = Math.random().toString(36).slice(2);
   wsClient.set(id, ws);
-  if (curSong.name != null) ws.send(curSong.name);
+  if (curSong) ws.send(`${curSong.basic_info.author} - ${curSong.basic_info.title}`);
   req.on('close', function() {
     wsClient.delete(id);
   });
 });
 
 wss.broadcast = (function(data) {
+  console.log("Now Playing:", data);
   wsClient.forEach(function(ws, id) {
     ws.send(data, function(error) {
       if (error) {
@@ -56,6 +58,19 @@ wss.broadcast = (function(data) {
     });
   });
 });
+
+function getVideoID(url) {
+  let u = new URL(url);
+  if (u.hostname === "youtu.be") return u.pathname.slice(1);
+  if (u.searchParams.v) return u.searchParams.v;
+}
+
+function getURL(song) {
+  let streamingData = song.streaming_data.adaptive_formats
+    .filter(i => !i.has_video && i.has_audio)
+    .shift();
+  return streamingData.decipher(client.session.player);
+}
 
 // Player
 let launch = function() {
@@ -68,34 +83,24 @@ let launch = function() {
   }
 };
 
-let play = function() {
-  if (playing) return false;
-  if (nextSong.id) {
-    url = `https://youtu.be/${nextSong.id}`;
-    fs.writeFileSync('yturl.txt', url, 'utf8');
-  } else if (!nextSong.id && curSong.id) {
-    nextSong.id = curSong.id;
+let play = async function() {
+  if (!curSong && !playlist.length && url) {
+    let song = await client.music.getInfo(getVideoID(url));
+    radio.play(getURL(song));
+    wss.broadcast(`${song.basic_info.author} - ${song.basic_info.title}`);
+    curSong = song;
+    playlist = (await song.getUpNext()).contents;
+    return;
   }
-  let stream = ytdl(url, { dlChunkSize: 0, filter: 'audioonly', quality: 'highestaudio' });
-  stream.on('info', async function(info) {
-    curSong.name = info.videoDetails.title;
-    curSong.id = info.videoDetails.id;
-    curSong.rv = info.related_videos;
-    let nv = curSong.rv.shift();
-    nextSong.id = nv.id;
-    nextSong.name = nv.title;
-    // Then broadcast it
-    radio.play(stream);
-    wss.broadcast(curSong.name);
-    console.log('-> Now Playing:', curSong.name);
-    console.log('   Next:', nextSong.name);
-    playing = true;
-  });
 
-  stream.on('error', (e) => {
-  	console.error(e);
-  	play();
-  });
+  if (!playlist.length) {
+    playlist = (await curSong.getUpNext()).contents;
+  }
+
+  let song = await client.music.getInfo(playlist.shift().video_id);
+  radio.play(getURL(song));
+  wss.broadcast(`${song.basic_info.author} - ${song.basic_info.title}`);
+  curSong = song;
 };
 
 radio.on('finish', () => {
@@ -107,29 +112,4 @@ radio.on('error', (e) => {
 	playing = false;
 	console.error(e);
 	play();
-});
-
-console.log("Press enter to change Next query, Or type \"next\" to skip the current song.");
-console.log("Available commands: next, setnext");
-process.stdin.on('data', (d) => {
-	d = d.toString('utf8');
-	let args = d.split(" ").slice(1);
-	if (!radio.stream) return;
-	if (d.startsWith("next")) {
-		console.log("-  Skipping....");
-		playing = false
-		return play();
-	} else if (d.startsWith("setnext")) {
-		if (!args.length) return console.log("-  Usage: setnext [youtube-video-url]");
-		nextSong.id = ytdl.getVideoID(args[0]);
-		return console.log("-  OK.");
-	}
-
-	if (!curSong.rv.length)
-		return console.log("-  Out of query. Song will looped.");
-
-	let nv = curSong.rv.shift();
-	nextSong.id = nv.id;
-	nextSong.name = nv.title;
-	console.log("-  Next:", nextSong.name);
 });

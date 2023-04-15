@@ -12,8 +12,8 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "openradio": "latest",
-    "ws": "7.x",
-    "ytdl-core": "4.10.0"
+    "ws": "^8.13.0",
+    "youtubei.js": "latest"
   },
   "repository": {
     "type": "git",
