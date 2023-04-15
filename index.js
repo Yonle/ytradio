@@ -98,6 +98,8 @@ let play = async function() {
   wss.broadcast(`${song.basic_info.author} - ${song.basic_info.title}`);
   console.log("   Up next:", `${playlist[0].author} - ${playlist[0].title.text}`);
   curSong = song;
+
+  fs.writeFileSync("yturl.txt", "https://youtu.be/" + song.basic_info.id, "utf8");
 };
 
 radio.on('finish', () => {
