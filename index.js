@@ -2,6 +2,7 @@ const http = require("http");
 const fs = require('fs');
 const WebSocket = require("ws").Server;
 const openradio = require("openradio");
+const miniget = require("miniget");
 const radio = openradio({
   format: "mp3",
   bitrate: 128
@@ -94,7 +95,7 @@ let play = async function() {
   }
 
   let song = await client.music.getInfo(playlist.shift().video_id);
-  radio.play(getURL(song));
+  radio.play(miniget(getURL(song)));
   wss.broadcast(`${song.basic_info.author} - ${song.basic_info.title}`);
   console.log("   Up next:", `${playlist[0].author} - ${playlist[0].title.text}`);
   curSong = song;
