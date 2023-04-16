@@ -62,7 +62,7 @@ wss.broadcast = (function(data) {
 function getVideoID(url) {
   let u = new URL(url);
   if (u.hostname === "youtu.be") return u.pathname.slice(1);
-  if (u.searchParams.v) return u.searchParams.v;
+  if (u.searchParams.has("v")) return u.searchParams.get("v");
 }
 
 function getURL(song) {
