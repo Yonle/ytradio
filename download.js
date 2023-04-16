@@ -86,7 +86,10 @@ module.exports = async function download(streamingData) {
     size // Download size
   );
 
-  dup.on('end', () => dup.destroy());
+  dup.on('end', () => {
+    dup.destroy();
+    clearListener(dup);
+  });
 
   return dup;
 }
