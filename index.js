@@ -2,7 +2,7 @@ const http = require("http");
 const fs = require('fs');
 const WebSocket = require("ws").Server;
 const openradio = require("openradio");
-const miniget = require("miniget");
+const download = require("./download");
 const radio = openradio({
   format: "mp3",
   bitrate: 96
@@ -66,11 +66,13 @@ function getVideoID(url) {
   if (u.searchParams.has("v")) return u.searchParams.get("v");
 }
 
-function getURL(song) {
+function getStreamingData(song) {
   let streamingData = song.streaming_data.adaptive_formats
     .filter(i => !i.has_video && i.has_audio)
     .pop();
-  return streamingData.decipher(client.session.player);
+  streamingData.url = streamingData.decipher(client.session.player);
+
+  return streamingData;
 }
 
 // Player
@@ -95,7 +97,7 @@ let play = async function() {
   }
 
   let song = await client.music.getInfo(playlist.shift().video_id);
-  radio.play(miniget(getURL(song)));
+  radio.play(await download(getStreamingData(song)));
   wss.broadcast(`${song.basic_info.author} - ${song.basic_info.title}`);
   console.log("   Up next:", `${playlist[0].author} - ${playlist[0].title.text}`);
   curSong = song;
