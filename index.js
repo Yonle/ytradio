@@ -98,6 +98,13 @@ let play = async function() {
     }
 
     let song = await client.music.getInfo(playlist.shift().video_id);
+    if (song.playability_status.status !== "OK") {
+      console.error(`-! "${song.basic_info.title}" could not be played.`);
+      console.error(`   Reason: ${song.playability_status.reason}`);
+      console.error('   Skipping....');
+      return play();
+    }
+
     radio.play(await download(getStreamingData(song)));
     wss.broadcast(`${song.basic_info.author} - ${song.basic_info.title}`);
     console.log("   Up next:", `${playlist[0].author} - ${playlist[0].title.text}`);
