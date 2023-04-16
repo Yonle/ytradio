@@ -5,7 +5,7 @@ const openradio = require("openradio");
 const miniget = require("miniget");
 const radio = openradio({
   format: "mp3",
-  bitrate: 128
+  bitrate: 96
 });
 
 const YouTube = require("youtubei.js");
