@@ -68,7 +68,7 @@ function getVideoID(url) {
 function getURL(song) {
   let streamingData = song.streaming_data.adaptive_formats
     .filter(i => !i.has_video && i.has_audio)
-    .shift();
+    .pop();
   return streamingData.decipher(client.session.player);
 }
 
