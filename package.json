@@ -15,6 +15,9 @@
     "ws": "^8.13.0",
     "youtubei.js": "latest"
   },
+  "engines": {
+    "node": ">=16.8"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Yonle/ytradio.git"
