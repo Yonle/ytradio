@@ -4,7 +4,7 @@ const WebSocket = require("ws").Server;
 const openradio = require("openradio");
 const radio = openradio({
   format: "mp3",
-  bitrate: 96
+  bitrate: 128
 });
 
 const YouTube = require("youtubei.js");
