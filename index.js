@@ -31,7 +31,7 @@ let server = http.createServer(function(req, res) {
   res.on('error', console.error);
 });
 
-YouTube.Innertube.create().then(a => {
+YouTube.Innertube.create({ location: process.env.GEOLOCATION || "US" }).then(a => {
   client = a;
   server.listen(process.env.PORT || 8080, () => launch());
   server.on('error', console.error);
