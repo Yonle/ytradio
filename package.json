@@ -11,6 +11,7 @@
   "author": "Yonle",
   "license": "BSD-3-Clause",
   "dependencies": {
+    "gopherserver.js": "^1.0.2",
     "miniget": "^4.2.2",
     "openradio": "latest",
     "ws": "^8.13.0",

@@ -1,4 +1,5 @@
 const http = require("http");
+const gopher = require("gopherserver")();
 const fs = require('fs');
 const WebSocket = require("ws").Server;
 const openradio = require("openradio");
@@ -23,6 +24,14 @@ let wsClient = new Map();
 
 // Server
 
+let gopherServer = gopher();
+
+gopherServer.on('request', soc => {
+  if (!soc.url && soc.query === "$") return soc.destroy();
+
+  repeater(soc);
+});
+
 let repeater = openradio.repeater(radio);
 let server = http.createServer(function(req, res) {
   res.setHeader("content-type", "audio/mpeg");
@@ -37,6 +46,7 @@ let server = http.createServer(function(req, res) {
 YouTube.Innertube.create({ location: process.env.GEOLOCATION || "US" }).then(a => {
   client = a;
   server.listen(process.env.PORT || 8080, () => launch());
+  gopherServer(process.env.GOPHER_PORT || 8081);
   server.on('error', console.error);
 });
 
@@ -85,6 +95,7 @@ let launch = function() {
     return process.exit(1);
   } else {
     console.log('Radio is now listening on port', process.env.PORT || 8080);
+    console.log('Gopher server is now listening on port', process.env.GOPHER_PORT || 8081);
     return play();
   }
 };
