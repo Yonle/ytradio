@@ -1,5 +1,5 @@
 const http = require("http");
-const gopher = require("gopherserver")();
+const gopher = require("gopherserver.js")();
 const fs = require('fs');
 const WebSocket = require("ws").Server;
 const openradio = require("openradio");
