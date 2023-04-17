@@ -46,7 +46,7 @@ function getChunk(beginRange, dup, streamingData, streamSize, sentSize = 0, last
       )
         return dup.end();
       lastConnErr++;
-      getChunk(beginRange + sentSize + 1, dup, streamingData, streamSize, sentSize, lastConnErr, headers);
+      getChunk(sentSize + 1, dup, streamingData, streamSize, sentSize, lastConnErr, headers);
     })
 
     .on("data", (c) => {
