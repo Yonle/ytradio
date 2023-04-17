@@ -97,6 +97,10 @@ let play = async function() {
     }
 
     let song = await client.music.getInfo(playlist.shift().video_id);
+    if (!playlist.length) {
+      playlist = (await curSong.getUpNext()).contents;
+    }
+
     if (song.playability_status.status !== "OK") {
       console.error(`-! "${song.basic_info.title}" could not be played.`);
       console.error(`   Reason: ${song.playability_status.reason}`);
