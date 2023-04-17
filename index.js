@@ -5,7 +5,7 @@ const openradio = require("openradio");
 const download = require("./download");
 const radio = openradio({
   format: "mp3",
-  bitrate: 96
+  bitrate: 128
 });
 
 const YouTube = require("youtubei.js");
@@ -96,10 +96,6 @@ let play = async function() {
       playlist = (await song.getUpNext()).contents;
     }
 
-    if (!playlist.length) {
-      playlist = (await curSong.getUpNext()).contents;
-    }
-
     let song = await client.music.getInfo(playlist.shift().video_id);
     if (song.playability_status.status !== "OK") {
       console.error(`-! "${song.basic_info.title}" could not be played.`);
@@ -114,6 +110,10 @@ let play = async function() {
     curSong = song;
 
     fs.writeFileSync("yturl.txt", "https://youtu.be/" + song.basic_info.id, "utf8");
+
+    if (!playlist.length) {
+      playlist = (await curSong.getUpNext()).contents;
+    }
   } catch (err) {
     console.error(err);
     play();
