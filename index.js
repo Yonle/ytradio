@@ -46,7 +46,7 @@ let server = http.createServer(function(req, res) {
 YouTube.Innertube.create({ location: process.env.GEOLOCATION || "US" }).then(a => {
   client = a;
   server.listen(process.env.PORT || 8080, () => launch());
-  gopherServer(process.env.GOPHER_PORT || 8081);
+  gopherServer.listen(process.env.GOPHER_PORT || 8081);
   server.on('error', console.error);
 });
 
