@@ -27,8 +27,11 @@ let repeater = openradio.repeater(radio);
 let server = http.createServer(function(req, res) {
   res.setHeader("content-type", "audio/mpeg");
   if (req.method === "HEAD") return res.end();
-  repeater(res);
-  res.on('error', console.error);
+  const conn = repeater(res);
+  res.on('error', err => {
+    console.error(err);
+    conn();
+  });
 });
 
 YouTube.Innertube.create({ location: process.env.GEOLOCATION || "US" }).then(a => {
