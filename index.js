@@ -40,7 +40,7 @@ hThis livestream runs on ytradio project.	URL:https://github.com/Yonle/ytradio	$
 `);
   } else if (soc.url === "/stream") {
     let conn = repeater(soc);
-    soc.on('close', err => {
+    soc.on('error', err => {
       conn();
     });
   }
