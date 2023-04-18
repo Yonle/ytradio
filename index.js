@@ -1,6 +1,7 @@
 const http = require("http");
 const gopher = require("gopherserver.js");
 const fs = require('fs');
+const os = require('os');
 const WebSocket = require("ws").Server;
 const openradio = require("openradio");
 const download = require("./download");
@@ -27,9 +28,19 @@ let wsClient = new Map();
 let gopherServer = gopher();
 
 gopherServer.on('request', soc => {
-  if (!soc.url && soc.query === "$") return soc.destroy();
-
-  repeater(soc);
+  if (!soc.url || soc.url === "/") {
+    let page =
+    soc.send(`!ytradio server
+i	${os.hostname()}\t${process.env.GOPHER_PORT || 8081}
+iWelcome to this ytradio livestream server.	${os.hostname()}\t${process.env.GOPHER_PORT || 8081}
+sStream here (Or /9/stream)	/stream	${os.hostname()}\t${process.env.GOPHER_PORT || 8081}
+i	${os.hostname()}\t${process.env.GOPHER_PORT || 8081}
+iNow Playing: ${curSong.basic_info.author} - ${curSong.basic_info.title}	${os.hostname()}\t${process.env.GOPHER_PORT || 8081}
+hThis livestream runs on ytradio project.	URL:https://github.com/Yonle/ytradio	${os.hostname()}\t${process.env.GOPHER_PORT || 8081}
+`);
+  } else if (soc.url === "/stream") {
+    repeater(soc);
+  }
 });
 
 let repeater = openradio.repeater(radio);
