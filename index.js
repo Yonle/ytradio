@@ -108,7 +108,7 @@ let launch = function() {
     return process.exit(1);
   } else {
     console.log('Radio is now listening on port', process.env.PORT || 8080);
-    console.log('Gopher server is now listening on port', process.env.GOPHER_PORT || 8081);
+    console.log('Gopher server is now listening on port', process.env.GOPHER_PORT || 8081, "(Change by setting GOPHER_PORT env variable)");
     return play();
   }
 };
