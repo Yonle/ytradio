@@ -39,7 +39,10 @@ iNow Playing: ${curSong.basic_info.author} - ${curSong.basic_info.title}	${os.ho
 hThis livestream runs on ytradio project.	URL:https://github.com/Yonle/ytradio	${os.hostname()}\t${process.env.GOPHER_PORT || 8081}
 `);
   } else if (soc.url === "/stream") {
-    repeater(soc);
+    let conn = repeater(soc);
+    soc.on('close', err => {
+      conn();
+    });
   }
 });
 
@@ -49,7 +52,6 @@ let server = http.createServer(function(req, res) {
   if (req.method === "HEAD") return res.end();
   const conn = repeater(res);
   res.on('error', err => {
-    console.error(err);
     conn();
   });
 });
