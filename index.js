@@ -60,6 +60,7 @@ YouTube.Innertube.create({ location: process.env.GEOLOCATION || "US" }).then(a =
   client = a;
   server.listen(process.env.PORT || 8080, () => launch());
   gopherServer.listen(process.env.GOPHER_PORT || 8081);
+  gopherServer.on('error', console.error);
   server.on('error', console.error);
 });
 
