@@ -86,5 +86,7 @@ module.exports = async function download(streamingData) {
     size // Download size
   );
 
+  dup.on('end', _ => dup.destroy());
+
   return dup;
 }
